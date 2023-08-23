@@ -1,0 +1,72 @@
+---
+title: "Bad data viz"
+format: html
+editor: visual
+---
+
+## Bad data viz
+
+```{r}
+library(tidyverse)
+library(paletteer)
+library(ggrepel)
+
+space <- read_csv("space_launches.csv") %>%
+  drop_na()
+```
+
+```{r}
+ggplot(space, aes(y = launch_year, fill = agency)) +
+  geom_density(alpha = 0.7) +
+  facet_wrap(~agency_type, scales = "free") +
+  scale_fill_paletteer_d(palette = "palettesForR::Volcano") +
+  theme(panel.background = element_rect(color = "purple", fill = "#d7a3f9", size = 3),
+        plot.background = element_rect(fill = "pink"),
+        legend.background = element_rect(color = "green", fill = "#d7a3f9", linewidth = 2),
+        panel.grid = element_line(color = "green", linewidth = 1),
+        axis.text.x = element_text(color = "purple", size = 15),
+        axis.text.y = element_text(color = "purple", size = 15)) +
+  labs(x = "how much", y = "when it happened", fill = "place that did it", title = "we went to space")
+```
+
+## Wrangling and good viz
+
+```{r}
+ghg <- read_csv("San_Francisco_Communitywide_Greenhouse_Gas_Inventory.csv")
+```
+
+```{r}
+ghg %>%
+  group_by(Sector_General) %>%
+  summarise(sum = sum(Emissions_mtCO2e, na.rm = TRUE))
+```
+
+```{r}
+ghg %>%
+  group_by(Calendar_Year, Commodity_Type) %>%
+  summarise(sum = sum(Emissions_mtCO2e, na.rm = TRUE))
+```
+
+
+```{r}
+ghg_subset <- ghg %>%
+  filter(Calendar_Year >= 2005) %>%
+  filter(str_detect(Sector_Detail2, pattern = "PG&E")) %>%
+  select(Calendar_Year, Sector_Detail2, Emissions_mtCO2e)
+
+ghg_subset
+```
+
+```{r}
+ghg_subset2 <- ghg %>%
+  filter(str_detect(Sector_Detail2, pattern = "Rail - Caltrain"),
+         Emissions_mtCO2e != 0)
+```
+
+```{r}
+ggplot(ghg_subset2, aes(x = Calendar_Year, y = Emissions_mtCO2e, color = Sector_Detail2)) +
+  geom_line(color = "black") +
+  labs(x = "Year", y = "Emissions (mtCO2)", title = "Caltrain CO2 Emissions") +
+  theme_linedraw() 
+```
+
